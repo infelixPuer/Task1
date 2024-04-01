@@ -1,91 +1,153 @@
+const COMPARISON = {
+    LESSER: 0,
+    EQUAL: 1,
+    GREATER: 2,
+}
+
 function plus(string) {
-    let firstNumber = Number.parseInt(this);
-    
-    if (isNaN(firstNumber)) {
-        console.error("First string must be a number!");
-        return null;
+    let shortStr = this.length > string.length ? string : this;
+    let longStr = this.length > string.length ? this : string;
+    let shortStrDigits = shortStr.split("").map(Number);
+    let longStrDigits = longStr.split("").map(Number);
+    let result = [];
+    let additional = 0;
+    let addRes = "";
+    let i, j = 0;
+
+    for (i = longStr.length - 1, j = shortStr.length - 1; j >= 0; --i, --j) {
+        let longStrNum = longStrDigits[i];
+        let shortStrNum = shortStrDigits[j];
+        addRes = ((longStrNum + shortStrNum) + additional).toString();
+        additional = addRes.length === 2 ? 1 : 0;
+        result.push(addRes.at(additional));
     }
 
-    let secondNumber = Number.parseInt(string);
+    if (i < 0 && additional === 0) return result.reverse().join("");
 
-    if (isNaN(secondNumber)) {
-        console.error("Second string must be a number!");
-        return null;
+    if (i < 0) {
+        result.push(additional.toString());
+        return result.reverse().join("");
     }
 
-    return firstNumber + secondNumber;
-};
+    for (; i >= 0; --i) {
+        if (additional === 0) {
+            result.push(longStr.at(i));
+            continue;
+        }
+
+        let longStrNum = Number.parseInt(longStr.at(i));
+        addRes = (longStrNum + additional).toString();
+        additional = addRes.length === 2 ? 1 : 0;
+        result.push(addRes.at(additional));
+    }
+
+    if (additional !== 0) result.push(additional);
+
+    return result.reverse().join('');
+}
 
 function minus(string) {
-    let firstNumber = Number.parseInt(this);
-    
-    if (isNaN(firstNumber)) {
-        console.error("First string must be a number!");
+    if (compareStrings(this, string) === COMPARISON.LESSER) {
+        console.error("Second string must be less of equal to first string");
         return null;
     }
 
-    let secondNumber = Number.parseInt(string);
+    let result = [];
+    let firstStrDigits = this.split("").map(Number);
+    let secondStrDigits = string.split("").map(Number);
+    let i = 0, j = 0, k = 1;
 
-    if (isNaN(secondNumber)) {
-        console.error("Second string must be a number!");
-        return null;
+    for (i = firstStrDigits.length - 1, j = secondStrDigits.length - 1; j >= 0; --i, --j) {
+        if (firstStrDigits[i] < secondStrDigits[j]) {
+            while (true) {
+                if (firstStrDigits[i - k] === 0) {
+                    firstStrDigits[i - k] = 9;
+                    ++k;
+                } else {
+                    --firstStrDigits[i - k];
+                    break;
+                }
+            }
+
+            result.push(firstStrDigits[i] + 10 - secondStrDigits[j]);
+            continue;
+        }
+
+        result.push(firstStrDigits[i] - secondStrDigits[j]);
     }
 
-    if (firstNumber < secondNumber) {
-        console.error("First string must be greater than second string!");
-        return null;
+    for (; i >= 0; --i) {
+        result.push(firstStrDigits[i]);
     }
 
-    return firstNumber - secondNumber;
-};
+    result.reverse();
 
-function divide(string) {
-    let firstNumber = Number.parseInt(this);
-    
-    if (isNaN(firstNumber)) {
-        console.error("First string must be a number!");
-        return null;
-    }
+    while (result[0] === 0 && result.length > 1) result.shift();
 
-    let secondNumber = Number.parseInt(string);
+    return result.join("");
+}
 
-    if (isNaN(secondNumber)) {
-        console.error("Second string must be a number!");
-        return null;
-    }
-
-    if (secondNumber === 0) {
-        console.error("Second string msut not equal zero!");
-        return null;
-    }
-
-    console.warn("String.divide method only returns integers");
-    console.warn("If you need a float result than consider using other method");
-
-    return Number.parseInt(firstNumber / secondNumber);
-};
 
 function multiply(string) {
-    let firstNumber = Number.parseInt(this);
-    
-    if (isNaN(firstNumber)) {
-        console.error("First string must be a number!");
-        return null;
+    let digits = this.split("").map(Number);
+    let result = "0";
+    let buffer = string;
+    let zeros = "";
+
+    for (let i = this.length - 1; i >= 0; --i) {
+        let numChar = digits[i];
+        buffer = string;
+
+        for (let j = 0; j < numChar - 1; ++j) {
+            buffer = buffer.plus(string);
+        }
+
+        buffer = buffer.concat(zeros);
+        result = result.plus(buffer);
+        zeros = zeros.concat("0");
     }
 
-    let secondNumber = Number.parseInt(string);
+    return result;
+}
 
-    if (isNaN(secondNumber)) {
-        console.error("Second string must be a number!");
-        return null;
+function divide(divisor) {
+    let digits = this.split("").map(Number);
+    let result = [];
+    let remainder = 0;
+
+    for (let i = 0; i < digits.length; ++i) {
+        let tempDividend = remainder * 10 + digits[i];
+        let resultDigit = Math.floor(tempDividend / divisor);
+
+        remainder = tempDividend % divisor;
+
+        result.push(resultDigit);
     }
 
-    return firstNumber * secondNumber;
-};
+    while (result[0] === 0 && result.length > 1) result.shift();
+
+    return result.join('');
+}
+
+function compareStrings(str1, str2) {
+    if (str1.length < str2.length) return COMPARISON.LESSER;
+
+    if (str1.length === str2.length) {
+        for (let i = 0; i < str1.length; ++i) {
+            let firstStrNum = Number.parseInt(str1.at(i));
+            let secondStrNum = Number.parseInt(str2.at(i));
+
+            if (firstStrNum < secondStrNum) return COMPARISON.LESSER;
+            if (firstStrNum > secondStrNum) return COMPARISON.GREATER;
+        }
+    }
+
+    return COMPARISON.EQUAL;
+}
 
 String.prototype.plus = plus;
 String.prototype.minus = minus;
 String.prototype.divie = divide;
 String.prototype.multiply = multiply;
 
-export { plus, minus, divide, multiply };
+export { plus, minus, divide, multiply }
