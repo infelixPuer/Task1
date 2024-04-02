@@ -91,12 +91,12 @@ function minus(string) {
 function multiply(string) {
     let digits = this.split("").map(Number);
     let result = "0";
-    let buffer = string;
+    let buffer;
     let zeros = "";
 
     for (let i = this.length - 1; i >= 0; --i) {
         let numChar = digits[i];
-        buffer = string;
+        buffer = numChar === 0 ? "0" : string;
 
         for (let j = 0; j < numChar - 1; ++j) {
             buffer = buffer.plus(string);
@@ -110,23 +110,22 @@ function multiply(string) {
     return result;
 }
 
-function divide(divisor) {
-    let digits = this.split("").map(Number);
-    let result = [];
-    let remainder = 0;
+function divide(string) {
+    let dividendDigits = this.split("").map(Number);
+    let result = "";
+    let partDividend= "";
 
-    for (let i = 0; i < digits.length; ++i) {
-        let tempDividend = remainder * 10 + digits[i];
-        let resultDigit = Math.floor(tempDividend / divisor);
-
-        remainder = tempDividend % divisor;
-
-        result.push(resultDigit);
+    for (let i = 0; i < dividendDigits.length; ++i) {
+        partDividend += dividendDigits[i];
+        let j = 0;
+        while (compareStrings(partDividend, string) >= COMPARISON.EQUAL) {
+            partDividend = partDividend.minus(string);
+            ++j;
+        }
+        result += j;
     }
 
-    while (result[0] === 0 && result.length > 1) result.shift();
-
-    return result.join('');
+    return result.replace(/^0+/, "") || "0";
 }
 
 function compareStrings(str1, str2) {
@@ -147,7 +146,7 @@ function compareStrings(str1, str2) {
 
 String.prototype.plus = plus;
 String.prototype.minus = minus;
-String.prototype.divie = divide;
+String.prototype.divide = divide;
 String.prototype.multiply = multiply;
 
 export { plus, minus, divide, multiply }
