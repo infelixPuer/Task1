@@ -129,6 +129,9 @@ function divide(string) {
 }
 
 function compareStrings(str1, str2) {
+    let buf = str1.replace(/^0+/, "");
+    str1 = buf === "" ? "0" : buf;
+
     if (str1.length < str2.length) return COMPARISON.LESSER;
 
     if (str1.length === str2.length) {
